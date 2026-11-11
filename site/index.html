@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>PricePulse Demo</title>
+  <meta name="description" content="Interactive demo of PricePulse, a price tracking and trend prediction platform for Malaysian e-commerce. Runs on synthetic data.">
+  <link rel="icon" type="image/svg+xml" href="assets/favicon.svg">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500;600&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="assets/style.css">
+</head>
+<body>
+  <div class="demo-banner">
+    <span>Demo with synthetic data<span class="banner-long">. No real marketplace data, no backend</span>.</span>
+    <a href="https://github.com/adfdzly/PricePulse-showcase" target="_blank" rel="noopener">About this project</a>
+  </div>
+
+  <div class="sidebar-backdrop" id="backdrop"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <img src="assets/logo.svg" alt="" class="logo-img">
+      <span class="logo-text">PricePulse</span>
+    </div>
+    <div class="sidebar-user">
+      <div class="avatar-circle">DU</div>
+      <div>
+        <div class="user-name">Demo User</div>
+        <div class="user-status"><span class="status-dot"></span>Online</div>
+      </div>
+    </div>
+    <nav id="nav"></nav>
+    <div class="sidebar-foot">v2.0 demo build</div>
+  </aside>
+
+  <header class="header">
+    <button class="btn-hamburger" id="hamburger" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" width="20" height="20"><path d="M4 6h16M4 12h16M4 18h16" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+    </button>
+    <h1 class="header-title" id="page-title">Dashboard</h1>
+    <form class="header-search" id="header-search">
+      <svg viewBox="0 0 24 24" width="16" height="16"><circle cx="11" cy="11" r="7" fill="none" stroke="currentColor" stroke-width="2"/><path d="M20 20l-4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round"/></svg>
+      <input type="text" id="header-q" placeholder="Search phones and tablets" autocomplete="off">
+    </form>
+  </header>
+
+  <main class="main" id="view" tabindex="-1"></main>
+
+  <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
+  <script src="assets/data.js"></script>
+  <script src="assets/app.js"></script>
+</body>
+</html>
