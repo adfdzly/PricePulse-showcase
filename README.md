@@ -25,8 +25,8 @@
 
 ## What it does
 
-Shoppers in Malaysia often see the same phone listed at very different prices on Lazada,
-Shopee and TikTok Shop, and prices swing around sale events like 11.11 and 12.12.
+Shoppers in Malaysia often see the same phone listed at very different prices on Lazada
+and Shopee, and prices swing around sale events like 11.11 and 12.12.
 PricePulse collects those listings every week, matches them to a single product, and answers
 three questions:
 
@@ -55,8 +55,8 @@ Users can bookmark products, set a target price and get an email when the price 
 | ![Search](docs/images/screenshots/search.png) | ![Product detail](docs/images/screenshots/product.png) |
 | **Bookmarks and alerts** | **Promotion calendar** |
 | ![Bookmarks](docs/images/screenshots/bookmarks.png) | ![Calendar](docs/images/screenshots/calendar.png) |
-| **Trend model** | **Data pipeline** |
-| ![Trend model](docs/images/screenshots/model.png) | ![Pipeline](docs/images/screenshots/pipeline.png) |
+| **Market analytics** | **ML model stats (staff panel)** |
+| ![Market analytics](docs/images/screenshots/analytics.png) | ![ML model stats](docs/images/screenshots/model.png) |
 
 <p align="center">
   <img src="docs/images/screenshots/mobile-dashboard.png" width="240" alt="Mobile dashboard">
@@ -64,35 +64,30 @@ Users can bookmark products, set a target price and get an email when the price 
   <img src="docs/images/screenshots/mobile-product.png" width="240" alt="Mobile product detail">
 </p>
 
-All screenshots come from the showcase demo, so the products, prices and predictions in them are synthetic.
+Screenshots are from the real application running locally on a snapshot of collected
+Lazada and Shopee data. The account is shown as "Demo User". The staff ML page reports the
+stored validation metrics of the latest training run; [docs/ML.md](docs/ML.md) covers the
+stricter walk-forward evaluation.
 
 ## How it works
 
-```mermaid
-flowchart LR
-    subgraph Sources
-      L[Lazada]
-      S[Shopee]
-      T[TikTok Shop]
-    end
-    Sources -->|managed scraper actors| P1[Scrape and clean]
-    P1 --> P2[Weekly aggregation]
-    P2 --> P3[Trend prediction]
-    P3 --> DB[(MySQL)]
-    DB --> API[Django REST API]
-    DB --> WEB[Django web app]
-    API --> MOB[React Native app]
-    DB --> AL[Price alert emails]
-    Q[Celery beat + workers] -.schedules.-> P1
-    R[(Redis)] -.broker and cache.-> Q
-```
+![PricePulse system architecture](docs/images/architecture.png)
 
-A Celery schedule runs the pipeline every week:
+**Data pipeline.** Product listings are collected from Lazada and Shopee through their
+scraping APIs, then cleaned and preprocessed. Cleaning normalises titles and extracts brand,
+RAM and storage so the same phone from both platforms maps to one product. Preprocessing
+rolls listings up into weekly statistics and engineered features. Everything is stored in
+MySQL.
 
-1. **Scrape and clean.** Lazada and Shopee are scraped in parallel. Platform-specific cleaners normalise titles, pull out brand, RAM and storage, and map each listing to a canonical product.
-2. **Aggregate.** Listings become one row per product per week: min, max, median, volatility, momentum, listing counts and anomaly flags.
-3. **Predict.** The active model version scores each product for next week.
-4. **Load and alert.** Results are bulk-written to MySQL, caches are refreshed, and users whose target prices were hit get an email.
+**Machine learning loop.** The trend model reads weekly statistics from the database,
+predicts next week's price direction for each product, and writes the prediction results
+back to the database. A Celery schedule repeats this every week.
+
+**Backend.** Django provides the API layer, handles database queries (with Redis caching
+and throttling), and serves the stored machine learning results.
+
+**Frontend.** The web app and the React Native app present product information, prediction
+and historical price graphs, recommended platforms, and platform price comparison.
 
 More detail is in [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md).
 
@@ -119,13 +114,14 @@ macro F1 is the metric that matters here.
 | Scraping | Apify actors via the Apify Python client, token rotation |
 | Web frontend | Django templates, vanilla JavaScript modules, Chart.js |
 | Mobile | React Native, Expo, TypeScript |
-| Infrastructure | Docker Compose, Nginx, self-hosted server behind a tunnel |
+| Infrastructure | Docker Compose, Nginx |
 | Security | django-axes login lockout, API throttling, CSRF protection, environment-based secrets |
 
 ## About the demo
 
-The [live demo](https://adfdzly.github.io/PricePulse-showcase/) is a static re-creation of
-the main user-facing pages. It shares the production visual theme, but:
+The [live demo](https://adfdzly.github.io/PricePulse-showcase/) is a simplified, clickable
+mock-up of the main user flows: search, product detail, bookmarks and alerts, and the trend
+model. Its layout is lighter than the real app shown in the screenshots above, and:
 
 - every product price, history point and prediction is generated in the browser from a fixed seed
 - there is no server, no login and no network calls apart from fonts and Chart.js
@@ -144,8 +140,7 @@ python -m http.server 8000 -d site
 site/               static demo (HTML, CSS, JS, synthetic data generator)
 docs/ARCHITECTURE.md  system design and data model overview
 docs/ML.md            model design and evaluation write-up
-docs/images/          screenshots and evaluation chart
-tools/screenshots.py  regenerates the README screenshots from the demo
+docs/images/          architecture diagram, screenshots and evaluation chart
 ```
 
 ## Author
@@ -159,5 +154,5 @@ please get in touch through my GitHub profile.
 ## License
 
 The contents of this showcase are shared for viewing only. See [LICENSE](LICENSE).
-Lazada, Shopee and TikTok Shop are trademarks of their respective owners; this project is
+Lazada and Shopee are trademarks of their respective owners; this project is
 not affiliated with them.

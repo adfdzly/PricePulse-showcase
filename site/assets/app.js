@@ -119,7 +119,7 @@
     var avgChange = ps.reduce(function (s, p) { return s + p.changePct; }, 0) / ps.length;
 
     var html = '<div class="page-intro fade-up"><h2>Good evening, Demo User</h2><p>Weekly snapshot of ' + ps.length +
-      ' tracked phone and tablet variants across Lazada, Shopee and TikTok Shop. Last pipeline run: ' + shortDate(D.jobs[0].date) + '.</p></div>' +
+      ' tracked phone and tablet variants across Lazada and Shopee. Last pipeline run: ' + shortDate(D.jobs[0].date) + '.</p></div>' +
       '<div class="grid grid-4">' +
       stat('Tracked variants', ps.length, 'across 9 brands', 'box', '#2196f3') +
       stat('Avg weekly change', pct(avgChange, 2), 'lowest price, week over week', 'tag', '#00bcd4') +

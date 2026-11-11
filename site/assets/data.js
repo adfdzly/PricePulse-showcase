@@ -21,8 +21,7 @@
 
   var PLATFORMS = [
     { id: 'lazada', name: 'Lazada', color: '#7b61ff' },
-    { id: 'shopee', name: 'Shopee', color: '#ff6f3c' },
-    { id: 'tiktok', name: 'TikTok Shop', color: '#25d0c4' }
+    { id: 'shopee', name: 'Shopee', color: '#ff6f3c' }
   ];
 
   // [brand, model, category, base price RM, variants [ram, storage]]
@@ -80,7 +79,6 @@
       var vol = 0.008 + rand() * 0.025;           // volatility
       var series = {};
       PLATFORMS.forEach(function (p, pi) {
-        if (pi === 2 && rand() < 0.35) return;    // not every item is on every platform
         var offset = 1 + (rand() - 0.5) * 0.08;
         var price = price0 * offset;
         var arr = [];

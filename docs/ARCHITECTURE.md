@@ -5,28 +5,19 @@ design decisions without exposing implementation code, credentials or deployment
 
 ## System overview
 
-```mermaid
-flowchart TB
-    subgraph Ingestion
-      A[Scraper actors<br>Lazada, Shopee] --> B[Platform cleaners]
-      B --> C[Canonical product matching]
-      C --> D[Weekly aggregation]
-      D --> E[Trend model]
-    end
-    E --> F[(MySQL)]
-    subgraph Serving
-      F --> G[Django web app<br>session auth]
-      F --> H[Django REST API<br>JWT auth]
-      H --> I[React Native app]
-    end
-    subgraph Background
-      J[Celery beat] --> K[Celery workers]
-      K --> A
-      K --> L[Alert emails]
-      M[(Redis)] --- K
-      M --- G
-    end
-```
+![PricePulse system architecture](images/architecture.png)
+
+| Stage | What happens |
+|---|---|
+| Lazada, Shopee | Source marketplaces for phone and tablet listings |
+| API data collection | Managed scraper actors return listing data through an API, with token rotation across runs |
+| Data cleaning | Normalises titles, prices and specs, and removes duplicates and accessories |
+| Data preprocessing | Matches listings to canonical products and aggregates them into weekly statistics and features |
+| Database | MySQL holds products, listings, price history, weekly statistics, predictions and user data |
+| Machine learning model | Reads weekly statistics and predicts next week's price trend |
+| Price prediction results | Written back to the database with confidence and model version |
+| Backend | Django API layer, database query handling (cached in Redis), and access to ML results |
+| Frontend | Product information, prediction and historical graph, recommended platforms, platform price comparison |
 
 ## Components
 
@@ -84,11 +75,11 @@ erDiagram
 - Login attempts are rate-limited and locked out after repeated failures.
 - API endpoints are throttled per user and per anonymous client.
 - Staff-only views and endpoints are permission-checked on the server.
-- The database is reachable only on a private network, never on a public port.
-- Production runs behind a reverse proxy with TLS terminated at the edge.
+- The database is never exposed on a public port.
+- The web app runs behind an Nginx reverse proxy.
 
 ## Deployment
 
-Production runs as a Docker Compose stack (web, Celery worker, Celery beat, MySQL, Redis,
-Nginx) on a self-hosted server, exposed through a tunnel. Configuration differs per
-environment and is supplied through an environment file that is not part of the repository.
+The system is packaged as a Docker Compose stack (web, Celery worker, Celery beat, MySQL,
+Redis, Nginx). Configuration differs per environment and is supplied through an environment
+file that is not part of the repository.
